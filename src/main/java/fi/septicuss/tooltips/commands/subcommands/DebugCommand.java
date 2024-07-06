@@ -2,9 +2,9 @@ package fi.septicuss.tooltips.commands.subcommands;
 
 import fi.septicuss.tooltips.Tooltips;
 import fi.septicuss.tooltips.commands.TooltipsSubCommand;
-import fi.septicuss.tooltips.object.preset.Preset;
-import fi.septicuss.tooltips.object.preset.condition.Statement;
-import fi.septicuss.tooltips.object.preset.condition.StatementHolder;
+import fi.septicuss.tooltips.managers.preset.Preset;
+import fi.septicuss.tooltips.managers.preset.condition.Statement;
+import fi.septicuss.tooltips.managers.preset.condition.StatementHolder;
 import fi.septicuss.tooltips.utils.Colors;
 import fi.septicuss.tooltips.utils.Messaging;
 import org.bukkit.Bukkit;
@@ -15,7 +15,6 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 // /tt debug [preset] [player]
@@ -72,15 +71,15 @@ public class DebugCommand implements TooltipsSubCommand {
 
     public void debugPreset(CommandSender sender, Player player, Preset preset) {
         ConfigurationSection section = preset.getSection();
-        var conditionsSection = section.getConfigurationSection("conditions");
 
-        if (conditionsSection == null) {
-            Messaging.send(sender, Colors.WARN + "[!] This preset does not have any conditions");
-            return;
-        }
-        var conditionLines = conditionsSection.getStringList("conditions");
+        List<String> conditionLines = null;
 
-        if (conditionLines.isEmpty()) {
+        if (section.contains("conditions.conditions"))
+            conditionLines = section.getStringList("conditions.conditions");
+        if (section.contains("conditions") && !section.isConfigurationSection("conditions"))
+            conditionLines = section.getStringList("conditions");;
+
+        if (conditionLines == null || conditionLines.isEmpty()) {
             Messaging.send(sender, Colors.WARN + "[!] This preset does not have any conditions");
             return;
         }

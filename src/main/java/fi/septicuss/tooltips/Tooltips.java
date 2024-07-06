@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
 
-import fi.septicuss.tooltips.commands.subcommands.*;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.block.Block;
@@ -15,55 +14,64 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import fi.septicuss.tooltips.api.TooltipsAPI;
 import fi.septicuss.tooltips.commands.TooltipsCommand;
+import fi.septicuss.tooltips.commands.subcommands.DebugCommand;
+import fi.septicuss.tooltips.commands.subcommands.EvalCommand;
+import fi.septicuss.tooltips.commands.subcommands.ListVarsCommand;
+import fi.septicuss.tooltips.commands.subcommands.ReloadCommand;
+import fi.septicuss.tooltips.commands.subcommands.SendPresetCommand;
+import fi.septicuss.tooltips.commands.subcommands.SendThemeCommand;
+import fi.septicuss.tooltips.commands.subcommands.VarsCommand;
 import fi.septicuss.tooltips.integrations.AreaProvider;
 import fi.septicuss.tooltips.integrations.FurnitureProvider;
 import fi.septicuss.tooltips.integrations.IntegratedPlugin;
+import fi.septicuss.tooltips.integrations.PacketProvider;
 import fi.septicuss.tooltips.integrations.crucible.CrucibleFurnitureProvider;
 import fi.septicuss.tooltips.integrations.itemsadder.ItemsAdderFurnitureProvider;
 import fi.septicuss.tooltips.integrations.oraxen.OraxenFurnitureProvider;
+import fi.septicuss.tooltips.integrations.packetevents.PacketEventsPacketProvider;
 import fi.septicuss.tooltips.integrations.papi.TooltipsExpansion;
+import fi.septicuss.tooltips.integrations.protocollib.ProtocolLibPacketProvider;
 import fi.septicuss.tooltips.integrations.worldguard.WorldGuardAreaProvider;
 import fi.septicuss.tooltips.listener.PlayerConnectionListener;
 import fi.septicuss.tooltips.listener.PlayerInteractListener;
 import fi.septicuss.tooltips.listener.PlayerMovementListener;
-import fi.septicuss.tooltips.object.icon.IconManager;
-import fi.septicuss.tooltips.object.preset.PresetManager;
-import fi.septicuss.tooltips.object.preset.condition.ConditionManager;
-import fi.septicuss.tooltips.object.preset.condition.argument.Argument;
-import fi.septicuss.tooltips.object.preset.condition.impl.BlockNbtEquals;
-import fi.septicuss.tooltips.object.preset.condition.impl.BlockStateEquals;
-import fi.septicuss.tooltips.object.preset.condition.impl.Compare;
-import fi.septicuss.tooltips.object.preset.condition.impl.Day;
-import fi.septicuss.tooltips.object.preset.condition.impl.EntityNbtEquals;
-import fi.septicuss.tooltips.object.preset.condition.impl.Equipped;
-import fi.septicuss.tooltips.object.preset.condition.impl.Gamemode;
-import fi.septicuss.tooltips.object.preset.condition.impl.InCuboid;
-import fi.septicuss.tooltips.object.preset.condition.impl.ItemNbtEquals;
-import fi.septicuss.tooltips.object.preset.condition.impl.Location;
-import fi.septicuss.tooltips.object.preset.condition.impl.LookingAtBlock;
-import fi.septicuss.tooltips.object.preset.condition.impl.LookingAtCitizen;
-import fi.septicuss.tooltips.object.preset.condition.impl.LookingAtEntity;
-import fi.septicuss.tooltips.object.preset.condition.impl.LookingAtFurniture;
-import fi.septicuss.tooltips.object.preset.condition.impl.LookingAtMythicMob;
-import fi.septicuss.tooltips.object.preset.condition.impl.Night;
-import fi.septicuss.tooltips.object.preset.condition.impl.Op;
-import fi.septicuss.tooltips.object.preset.condition.impl.Permission;
-import fi.septicuss.tooltips.object.preset.condition.impl.Region;
-import fi.septicuss.tooltips.object.preset.condition.impl.Sneaking;
-import fi.septicuss.tooltips.object.preset.condition.impl.StandingOn;
-import fi.septicuss.tooltips.object.preset.condition.impl.TileEntityNbtEquals;
-import fi.septicuss.tooltips.object.preset.condition.impl.Time;
-import fi.septicuss.tooltips.object.preset.condition.impl.World;
-import fi.septicuss.tooltips.object.schema.SchemaManager;
-import fi.septicuss.tooltips.object.theme.ThemeManager;
+import fi.septicuss.tooltips.managers.icon.IconManager;
+import fi.septicuss.tooltips.managers.preset.PresetManager;
+import fi.septicuss.tooltips.managers.preset.condition.ConditionManager;
+import fi.septicuss.tooltips.managers.preset.condition.argument.Argument;
+import fi.septicuss.tooltips.managers.preset.condition.impl.BlockNbtEquals;
+import fi.septicuss.tooltips.managers.preset.condition.impl.BlockStateEquals;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Compare;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Day;
+import fi.septicuss.tooltips.managers.preset.condition.impl.EntityNbtEquals;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Equipped;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Gamemode;
+import fi.septicuss.tooltips.managers.preset.condition.impl.InCuboid;
+import fi.septicuss.tooltips.managers.preset.condition.impl.ItemNbtEquals;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Location;
+import fi.septicuss.tooltips.managers.preset.condition.impl.LookingAtBlock;
+import fi.septicuss.tooltips.managers.preset.condition.impl.LookingAtCitizen;
+import fi.septicuss.tooltips.managers.preset.condition.impl.LookingAtEntity;
+import fi.septicuss.tooltips.managers.preset.condition.impl.LookingAtFurniture;
+import fi.septicuss.tooltips.managers.preset.condition.impl.LookingAtMythicMob;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Night;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Op;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Permission;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Region;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Sneaking;
+import fi.septicuss.tooltips.managers.preset.condition.impl.StandingOn;
+import fi.septicuss.tooltips.managers.preset.condition.impl.TileEntityNbtEquals;
+import fi.septicuss.tooltips.managers.preset.condition.impl.Time;
+import fi.septicuss.tooltips.managers.preset.condition.impl.World;
+import fi.septicuss.tooltips.managers.schema.SchemaManager;
+import fi.septicuss.tooltips.managers.theme.ThemeManager;
+import fi.septicuss.tooltips.managers.title.TitleManager;
 import fi.septicuss.tooltips.pack.PackGenerator;
 import fi.septicuss.tooltips.pack.impl.IconGenerator;
 import fi.septicuss.tooltips.pack.impl.LineGenerator;
@@ -95,7 +103,7 @@ public class Tooltips extends JavaPlugin {
 	private static Logger LOGGER;
 	private static boolean USE_SPACES;
 
-	private ProtocolManager protocolManager;
+	private TitleManager titleManager;
 	private SchemaManager schemaManager;
 	private IconManager iconManager;
 	private ThemeManager themeManager;
@@ -104,6 +112,8 @@ public class Tooltips extends JavaPlugin {
 	private TooltipManager tooltipManager;
 	private TooltipRunnableManager runnableManager;
 
+	private IntegratedPlugin packetPlugin;
+	private PacketProvider packetProvider;
 	private FurnitureProvider furnitureProvider;
 	private AreaProvider areaProvider;
 
@@ -146,8 +156,6 @@ public class Tooltips extends JavaPlugin {
 	
 	@Override
 	public void onEnable() {
-		protocolManager = ProtocolLibrary.getProtocolManager();
-
 		FileSetup.performMigration(this);
 		FileSetup.setupFiles(this);
 
@@ -162,6 +170,7 @@ public class Tooltips extends JavaPlugin {
 			expansion.register();
 		}
 
+		titleManager = new TitleManager(this);
 		conditionManager = new ConditionManager();
 
 		addLocalPlaceholders();
@@ -273,6 +282,34 @@ public class Tooltips extends JavaPlugin {
 			};
 
 		}
+		
+		// Load providers for appropriate packet plugins
+		for (IntegratedPlugin packetPlugin : IntegratedPlugin.PACKET_PLUGINS) {
+			
+			if (!packetPlugin.isEnabled()) {
+				continue;
+			}
+
+			
+			this.packetProvider = switch (packetPlugin) {
+			case PACKETEVENTS -> new PacketEventsPacketProvider();
+			case PROTOCOLLIB -> new ProtocolLibPacketProvider();
+			default -> null;
+			};
+			
+			if (this.packetProvider != null) {
+				this.packetPlugin = packetPlugin;
+				break;
+			}
+			
+		}
+		
+		if (this.packetProvider == null) {
+			log("No supported packet plugin found! Tooltips requires either ProtocolLib or PacketEvents.");
+			pluginManager.disablePlugin(this);
+			return;
+		}
+		
 
 	}
 
@@ -488,9 +525,9 @@ public class Tooltips extends JavaPlugin {
 	public static Tooltips get() {
 		return INSTANCE;
 	}
-
-	public ProtocolManager getProtocolManager() {
-		return protocolManager;
+	
+	public TitleManager getTitleManager() {
+		return titleManager;
 	}
 
 	public ThemeManager getThemeManager() {
@@ -511,6 +548,14 @@ public class Tooltips extends JavaPlugin {
 
 	public TooltipManager getTooltipManager() {
 		return tooltipManager;
+	}
+	
+	public PacketProvider getPacketProvider() {
+		return packetProvider;
+	}
+	
+	public IntegratedPlugin getPacketPlugin() {
+		return packetPlugin;
 	}
 
 	public FurnitureProvider getFurnitureProvider() {

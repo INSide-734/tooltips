@@ -6,9 +6,9 @@ import java.util.List;
 import org.bukkit.entity.Player;
 
 import fi.septicuss.tooltips.Tooltips;
-import fi.septicuss.tooltips.object.icon.IconManager;
-import fi.septicuss.tooltips.object.preset.Preset;
-import fi.septicuss.tooltips.object.theme.Theme;
+import fi.septicuss.tooltips.managers.icon.IconManager;
+import fi.septicuss.tooltips.managers.preset.Preset;
+import fi.septicuss.tooltips.managers.theme.Theme;
 import fi.septicuss.tooltips.tooltip.building.TooltipProperties;
 import fi.septicuss.tooltips.tooltip.building.element.BackgroundElement;
 import fi.septicuss.tooltips.tooltip.building.element.TextLineElement;
@@ -58,8 +58,11 @@ public class TooltipManager {
 		}
 
 		// --- BACKGROUND ---
+		int leftPadding = tooltipProperties.getTheme().getLeftPadding();
+		int rightPadding = tooltipProperties.getTheme().getRightPadding();
+
 		var background = new BackgroundElement(tooltipProperties.getTheme(), tooltipProperties.getColor(),
-				longestWidth);
+				longestWidth + rightPadding);
 
 		ComponentBuilder componentBuilder = new ComponentBuilder();
 
@@ -72,10 +75,9 @@ public class TooltipManager {
 		for (var backgroundPart : background.getParts())
 			componentBuilder.append(backgroundPart);
 
-		int textPadding = tooltipProperties.getTheme().getPadding();
 		int backgroundOffset = -background.getWidth();
 
-		componentBuilder.append(Spaces.getOffset(backgroundOffset + textPadding));
+		componentBuilder.append(Spaces.getOffset(backgroundOffset + leftPadding));
 
 		// --- TEXT ---
 		int index = 0;
